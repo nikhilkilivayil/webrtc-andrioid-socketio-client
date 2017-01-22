@@ -32,6 +32,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.lang.RuntimeException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
@@ -47,6 +48,7 @@ import org.webrtc.EglBase;
 import org.webrtc.FileVideoCapturer;
 import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
+import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.ScreenCapturerAndroid;
@@ -307,14 +309,16 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
     // Create connection client. Use DirectRTCClient if room name is an IP otherwise use the
     // standard WebSocketRTCClient.
-    if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
+   /* if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
       appRtcClient = new WebSocketRTCClient(this);
     } else {
       Log.i(TAG, "Using DirectRTCClient because room name looks like an IP.");
       appRtcClient = new DirectRTCClient(this);
-    }
+    }*/
+
+    appRtcClient=new SocketIORTCClient(this,this);
     // Create connection parameters.
-    roomConnectionParameters = new RoomConnectionParameters(roomUri.toString(), roomId, loopback);
+   // roomConnectionParameters = new RoomConnectionParameters(roomUri.toString(), roomId, loopback);
 
     // Create CPU monitor
     cpuMonitor = new CpuMonitor(this);
@@ -525,8 +529,8 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     callStartedTimeMs = System.currentTimeMillis();
 
     // Start room connection.
-    logAndToast(getString(R.string.connecting_to, roomConnectionParameters.roomUrl));
-    appRtcClient.connectToRoom(roomConnectionParameters);
+    //logAndToast(getString(R.string.connecting_to, roomConnectionParameters.roomUrl));
+    //appRtcClient.connectToRoom(roomConnectionParameters);
 
     // Create and audio manager that will take care of audio routing,
     // audio modes, audio device enumeration etc.
@@ -543,6 +547,13 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
         onAudioManagerDevicesChanged(audioDevice, availableAudioDevices);
       }
     });
+
+    LinkedList<PeerConnection.IceServer> iceServers =new LinkedList<PeerConnection.IceServer>();
+    iceServers.add(new PeerConnection.IceServer("stun.l.google.com:19302", "", ""));
+
+    SignalingParameters params = new SignalingParameters(
+            iceServers, true, "hello", null, null);
+    onConnectedToRoomInternal(params);
   }
 
   // Should be called from UI thread

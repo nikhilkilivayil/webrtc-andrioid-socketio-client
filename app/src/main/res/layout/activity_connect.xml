@@ -37,12 +37,7 @@
             android:contentDescription="@string/connect_description"
             android:background="@android:drawable/sym_action_call" />
 
-        <ImageButton
-            android:id="@+id/add_favorite_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:contentDescription="@string/add_favorite_description"
-            android:background="@android:drawable/ic_input_add" />
+
     </LinearLayout>
 
     <TextView

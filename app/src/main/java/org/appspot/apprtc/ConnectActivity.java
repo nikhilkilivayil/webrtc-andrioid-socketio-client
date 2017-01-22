@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -33,22 +34,25 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import io.socket.client.Ack;
+
 /**
  * Handles the initial setup where the user selects which room to join.
  */
-public class ConnectActivity extends Activity {
+public class ConnectActivity extends Activity implements SocketIOChannelClient.SocketIOChannelEvents{
   private static final String TAG = "ConnectActivity";
   private static final int CONNECTION_REQUEST = 1;
   private static final int REMOVE_FAVORITE_INDEX = 0;
   private static boolean commandLineRun = false;
 
   private ImageButton connectButton;
-  private ImageButton addFavoriteButton;
   private EditText roomEditText;
   private ListView roomListView;
   private SharedPreferences sharedPref;
@@ -88,6 +92,9 @@ public class ConnectActivity extends Activity {
   private String keyprefDataProtocol;
   private String keyprefNegotiated;
   private String keyprefDataId;
+  SocketIOChannelClient channelClient;
+
+
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -134,16 +141,8 @@ public class ConnectActivity extends Activity {
     setContentView(R.layout.activity_connect);
 
     roomEditText = (EditText) findViewById(R.id.room_edittext);
-    roomEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-      @Override
-      public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-        if (i == EditorInfo.IME_ACTION_DONE) {
-          addFavoriteButton.performClick();
-          return true;
-        }
-        return false;
-      }
-    });
+    //roomEditText.setEnabled(false);
+
     roomEditText.requestFocus();
 
     roomListView = (ListView) findViewById(R.id.room_listview);
@@ -152,19 +151,14 @@ public class ConnectActivity extends Activity {
     registerForContextMenu(roomListView);
     connectButton = (ImageButton) findViewById(R.id.connect_button);
     connectButton.setOnClickListener(connectListener);
-    addFavoriteButton = (ImageButton) findViewById(R.id.add_favorite_button);
-    addFavoriteButton.setOnClickListener(addFavoriteListener);
 
-    // If an implicit VIEW intent is launching the app, go directly to that URL.
-    final Intent intent = getIntent();
-    if ("android.intent.action.VIEW".equals(intent.getAction()) && !commandLineRun) {
-      boolean loopback = intent.getBooleanExtra(CallActivity.EXTRA_LOOPBACK, false);
-      int runTimeMs = intent.getIntExtra(CallActivity.EXTRA_RUNTIME, 0);
-      boolean useValuesFromIntent =
-          intent.getBooleanExtra(CallActivity.EXTRA_USE_VALUES_FROM_INTENT, false);
-      String room = sharedPref.getString(keyprefRoom, "");
-      connectToRoom(room, true, loopback, useValuesFromIntent, runTimeMs);
-    }
+
+
+
+    channelClient=new SocketIOChannelClient(this,this);
+    Toast.makeText(this,"Connecting..",Toast.LENGTH_SHORT).show();
+    showInputDialog();
+
   }
 
   @Override
@@ -218,37 +212,11 @@ public class ConnectActivity extends Activity {
   @Override
   public void onPause() {
     super.onPause();
-    String room = roomEditText.getText().toString();
-    String roomListJson = new JSONArray(roomList).toString();
-    SharedPreferences.Editor editor = sharedPref.edit();
-    editor.putString(keyprefRoom, room);
-    editor.putString(keyprefRoomList, roomListJson);
-    editor.commit();
   }
 
   @Override
   public void onResume() {
     super.onResume();
-    String room = sharedPref.getString(keyprefRoom, "");
-    roomEditText.setText(room);
-    roomList = new ArrayList<String>();
-    String roomListJson = sharedPref.getString(keyprefRoomList, null);
-    if (roomListJson != null) {
-      try {
-        JSONArray jsonArray = new JSONArray(roomListJson);
-        for (int i = 0; i < jsonArray.length(); i++) {
-          roomList.add(jsonArray.get(i).toString());
-        }
-      } catch (JSONException e) {
-        Log.e(TAG, "Failed to load room list: " + e.toString());
-      }
-    }
-    adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, roomList);
-    roomListView.setAdapter(adapter);
-    if (adapter.getCount() > 0) {
-      roomListView.requestFocus();
-      roomListView.setItemChecked(0, true);
-    }
   }
 
   @Override
@@ -594,20 +562,12 @@ public class ConnectActivity extends Activity {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
           String roomId = ((TextView) view).getText().toString();
-          connectToRoom(roomId, false, false, false, 0);
+          roomEditText.setText(roomId);
+          //connectToRoom(roomId, false, false, false, 0);
         }
       };
 
-  private final OnClickListener addFavoriteListener = new OnClickListener() {
-    @Override
-    public void onClick(View view) {
-      String newRoom = roomEditText.getText().toString();
-      if (newRoom.length() > 0 && !roomList.contains(newRoom)) {
-        adapter.add(newRoom);
-        adapter.notifyDataSetChanged();
-      }
-    }
-  };
+
 
   private final OnClickListener connectListener = new OnClickListener() {
     @Override
@@ -615,4 +575,116 @@ public class ConnectActivity extends Activity {
       connectToRoom(roomEditText.getText().toString(), false, false, false, 0);
     }
   };
+
+  @Override
+  public void onConnect() {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            Toast.makeText(ConnectActivity.this,"Connected to server",Toast.LENGTH_LONG).show();
+          }
+        });
+  }
+
+  @Override
+  public void onDisconnect() {
+
+  }
+
+  @Override
+  public void onConnectError() {
+
+  }
+
+  @Override
+  public void onLineUserNames(JSONArray usernames) {
+    Log.e("usernames",usernames.toString());
+
+    roomList = new ArrayList<String>();
+    for(int i=0;i<usernames.length();i++){
+      try {
+        roomList.add(usernames.getString(i));
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+    adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, roomList);
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        roomListView.setAdapter(adapter);
+      }
+    });
+
+
+  }
+
+  @Override
+  public void onIncomingCall(String from, String sdp) {
+
+  }
+
+  @Override
+  public void onRingingResponse(String from) {
+
+  }
+
+  @Override
+  public void onRemoteAnswer(String from, String sdp) {
+
+  }
+
+  @Override
+  public void onAck(String from) {
+
+  }
+  private void showInputDialog(){
+
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle("Enter Username to login");
+
+// Set up the input
+    final EditText input = new EditText(this);
+// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+    input.setInputType(InputType.TYPE_CLASS_TEXT);
+    builder.setView(input);
+    builder.setCancelable(false);
+
+// Set up the buttons
+    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(final DialogInterface dialog, int which) {
+        Ack ack=new Ack() {
+          @Override
+          public void call(Object... args) {
+            boolean b=(boolean)args[0];
+            if(b){
+              runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                  Toast.makeText(ConnectActivity.this,"Login success",Toast.LENGTH_SHORT).show();
+                  dialog.cancel();
+                }
+              });
+
+            }
+          }
+        };
+        String m_Text = input.getText().toString();
+        if(channelClient.isConnected()){
+          channelClient.loginAttempt(m_Text,ack);
+        }
+      }
+    });
+    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        //dialog.cancel();
+      }
+    });
+
+    builder.show();
+
+
+  }
 }

@@ -170,8 +170,8 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
     events.onConnectedToRoom(signalingParameters);
 
     // Connect and register WebSocket client.
-    wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
-    wsClient.register(connectionParameters.roomId, signalingParameters.clientId);
+    //wsClient.connect(signalingParameters.wssUrl, signalingParameters.wssPostUrl);
+    //wsClient.register(connectionParameters.roomId, signalingParameters.clientId);
   }
 
   // Send local offer SDP to the other participant.

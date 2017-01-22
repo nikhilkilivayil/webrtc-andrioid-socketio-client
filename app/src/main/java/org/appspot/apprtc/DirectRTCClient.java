@@ -236,8 +236,6 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
           new LinkedList<PeerConnection.IceServer>(),
           isServer, // Server side acts as the initiator on direct connections.
           null, // clientId
-          null, // wssUrl
-          null, // wwsPostUrl
           null, // offerSdp
           null // iceCandidates
           );
@@ -272,8 +270,6 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
             new LinkedList<PeerConnection.IceServer>(),
             false, // This code will only be run on the client side. So, we are not the initiator.
             null, // clientId
-            null, // wssUrl
-            null, // wssPostUrl
             sdp, // offerSdp
             null // iceCandidates
             );

@@ -149,7 +149,7 @@ public class RoomParametersFetcher {
       }
 
       SignalingParameters params = new SignalingParameters(
-          iceServers, initiator, clientId, wssUrl, wssPostUrl, offerSdp, iceCandidates);
+          iceServers, initiator, clientId, offerSdp, iceCandidates);
       events.onSignalingParametersReady(params);
     } catch (JSONException e) {
       events.onSignalingParametersError("Room JSON parsing error: " + e.toString());
