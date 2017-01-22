@@ -549,7 +549,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     });
 
     LinkedList<PeerConnection.IceServer> iceServers =new LinkedList<PeerConnection.IceServer>();
-    iceServers.add(new PeerConnection.IceServer("stun.l.google.com:19302", "", ""));
+    iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302", "", ""));
 
     SignalingParameters params = new SignalingParameters(
             iceServers, true, "hello", null, null);

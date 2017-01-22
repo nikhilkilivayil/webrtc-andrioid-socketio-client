@@ -45,6 +45,7 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void sendLocalIceCandidate(IceCandidate candidate) {
+        Log.e("Ice candidate",candidate.toString());
 
     }
 
