@@ -51,6 +51,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   private static final int CONNECTION_REQUEST = 1;
   private static final int REMOVE_FAVORITE_INDEX = 0;
   private static boolean commandLineRun = false;
+  private String username;
 
   private ImageButton connectButton;
   private EditText roomEditText;
@@ -468,6 +469,8 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
       Uri uri = Uri.parse(roomUrl);
       Intent intent = new Intent(this, CallActivity.class);
       intent.setData(uri);
+      intent.putExtra(CallActivity.EXTRA_USERNAME,username);
+      intent.putExtra(CallActivity.EXTRA_TO_USERNAME,roomId);
       intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
       intent.putExtra(CallActivity.EXTRA_LOOPBACK, loopback);
       intent.putExtra(CallActivity.EXTRA_VIDEO_CALL, videoCallEnabled);
@@ -603,7 +606,8 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
     roomList = new ArrayList<String>();
     for(int i=0;i<usernames.length();i++){
       try {
-        roomList.add(usernames.getString(i));
+        if(!usernames.getString(i).equals(username))
+          roomList.add(usernames.getString(i));
       } catch (JSONException e) {
         e.printStackTrace();
       }
@@ -670,9 +674,9 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
             }
           }
         };
-        String m_Text = input.getText().toString();
+        username = input.getText().toString();
         if(channelClient.isConnected()){
-          channelClient.loginAttempt(m_Text,ack);
+          channelClient.loginAttempt(username,ack);
         }
       }
     });

@@ -3,6 +3,7 @@ package org.appspot.apprtc;
 import android.app.Activity;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.webrtc.ThreadUtils;
 
 import java.util.concurrent.ExecutorService;
@@ -52,6 +53,10 @@ public class SocketIOChannelClient {
             mSocket.on("ack", onAcknowledgement);
             mSocket.connect();
         }
+    }
+
+    public void sendMessage(String type,JSONObject message){
+        mSocket.emit(type,message);
     }
 
     public boolean isConnected(){

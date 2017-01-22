@@ -5,6 +5,8 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
@@ -18,11 +20,15 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
     private enum ConnectionState { NEW, CONNECTED, CLOSED, ERROR }
     private ConnectionState roomState;
     SocketIOChannelClient channelClient;
+    private String username;
+    private String toUsername;
 
-    SocketIORTCClient(Activity activity,SignalingEvents events){
+    SocketIORTCClient(Activity activity,SignalingEvents events,String username,String toUsername){
         this.events=events;
         roomState=ConnectionState.NEW;
         channelClient=new SocketIOChannelClient(activity,this);
+        this.username=username;
+        this.toUsername=toUsername;
 
     }
 
@@ -33,9 +39,16 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void sendOfferSdp(SessionDescription sdp) {
-
         Log.e("Offer sdp",sdp.description);
-
+        JSONObject jsonObject=new JSONObject();
+        try {
+            jsonObject.put("from",username);
+            jsonObject.put("to",toUsername);
+            jsonObject.put("sdp",sdp);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        channelClient.sendMessage("offer",jsonObject);
     }
 
     @Override

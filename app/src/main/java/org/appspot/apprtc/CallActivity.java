@@ -66,6 +66,8 @@ import org.webrtc.VideoRenderer;
 public class CallActivity extends Activity implements AppRTCClient.SignalingEvents,
                                                       PeerConnectionClient.PeerConnectionEvents,
                                                       CallFragment.OnCallEvents {
+  public static final String EXTRA_USERNAME = "org.appspot.apprtc.USERNAME";
+  public static final String EXTRA_TO_USERNAME = "org.appspot.apprtc.TO_USERNAME";
   public static final String EXTRA_ROOMID = "org.appspot.apprtc.ROOMID";
   public static final String EXTRA_LOOPBACK = "org.appspot.apprtc.LOOPBACK";
   public static final String EXTRA_VIDEO_CALL = "org.appspot.apprtc.VIDEO_CALL";
@@ -315,8 +317,9 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       Log.i(TAG, "Using DirectRTCClient because room name looks like an IP.");
       appRtcClient = new DirectRTCClient(this);
     }*/
-
-    appRtcClient=new SocketIORTCClient(this,this);
+    String username=intent.getStringExtra(EXTRA_USERNAME);
+    String toUsername=intent.getStringExtra(EXTRA_TO_USERNAME);
+    appRtcClient=new SocketIORTCClient(this,this,username,toUsername);
     // Create connection parameters.
    // roomConnectionParameters = new RoomConnectionParameters(roomUri.toString(), roomId, loopback);
 
