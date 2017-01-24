@@ -3,6 +3,7 @@ package org.appspot.apprtc;
 import android.app.Activity;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.ThreadUtils;
 
@@ -102,7 +103,16 @@ public class SocketIOChannelClient {
 
         @Override
         public void call(Object... args) {
-            eventListener.onIncomingCall("","");
+            JSONObject jsonObject=(JSONObject) args[0];
+            try {
+                String from=jsonObject.getString("from");
+                String sdp=jsonObject.getString("sdp");
+                eventListener.onIncomingCall(from,sdp);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
 
         }
     };

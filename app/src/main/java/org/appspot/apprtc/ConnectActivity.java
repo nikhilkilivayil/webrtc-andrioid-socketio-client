@@ -626,6 +626,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   @Override
   public void onIncomingCall(String from, String sdp) {
 
+
   }
 
   @Override
@@ -689,6 +690,27 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
 
     builder.show();
 
+
+  }
+
+  public void showIncomingCallAlert(String from,String sdp){
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+    builder.setTitle("Incoming Call");
+    builder.setMessage(from+" Calling...");
+    builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+
+      }
+    });
+    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+
+      }
+    });
+    builder.show();
 
   }
 }
