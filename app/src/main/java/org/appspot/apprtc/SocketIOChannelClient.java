@@ -59,6 +59,9 @@ public class SocketIOChannelClient {
     public void sendMessage(String type,JSONObject message){
         mSocket.emit(type,message);
     }
+    public void sendMessage(String type,JSONObject message,Ack ack){
+        mSocket.emit(type,message,ack);
+    }
 
     public boolean isConnected(){
         return mSocket.connected();
