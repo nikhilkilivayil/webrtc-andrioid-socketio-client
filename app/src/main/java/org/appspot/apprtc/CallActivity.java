@@ -66,6 +66,8 @@ import org.webrtc.VideoRenderer;
 public class CallActivity extends Activity implements AppRTCClient.SignalingEvents,
                                                       PeerConnectionClient.PeerConnectionEvents,
                                                       CallFragment.OnCallEvents {
+  public static final String EXTRA_OFFER_SDP="org.appspot.apprtc.OFFER_SDP";
+  public static final String EXTRA_IS_INITIATED="org.appspot.apprtc.IS_INITIATED";
   public static final String EXTRA_USERNAME = "org.appspot.apprtc.USERNAME";
   public static final String EXTRA_TO_USERNAME = "org.appspot.apprtc.TO_USERNAME";
   public static final String EXTRA_ROOMID = "org.appspot.apprtc.ROOMID";
@@ -171,6 +173,10 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private HudFragment hudFragment;
   private CpuMonitor cpuMonitor;
 
+
+  private String offerSDP;
+  private boolean isInitiated;
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -211,6 +217,9 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     remoteRenderers.add(remoteRenderScreen);
 
     final Intent intent = getIntent();
+
+    offerSDP=intent.getStringExtra(EXTRA_OFFER_SDP);
+    isInitiated=intent.getBooleanExtra(EXTRA_IS_INITIATED,true);
 
     // Create video renderers.
     rootEglBase = EglBase.create();
@@ -553,9 +562,16 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
     LinkedList<PeerConnection.IceServer> iceServers =new LinkedList<PeerConnection.IceServer>();
     iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302", "", ""));
+    SignalingParameters params;
+    if(isInitiated){
+       params = new SignalingParameters(
+              iceServers, true, "hello", null, null);
+    }else{
+      SessionDescription sessionDescription=new SessionDescription(SessionDescription.Type.OFFER,offerSDP);
+      params = new SignalingParameters(
+              iceServers, false, "hello", sessionDescription, null);
+    }
 
-    SignalingParameters params = new SignalingParameters(
-            iceServers, true, "hello", null, null);
     onConnectedToRoomInternal(params);
   }
 

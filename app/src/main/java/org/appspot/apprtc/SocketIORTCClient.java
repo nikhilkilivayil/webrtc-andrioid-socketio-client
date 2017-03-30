@@ -54,8 +54,8 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
         JSONObject jsonObject=new JSONObject();
         try {
             jsonObject.put("from",username);
-            jsonObject.put("to",toUsername);
-            jsonObject.put("sdp",sdp);
+            jsonObject.put("to",toUsername.trim());
+            jsonObject.put("sdp",sdp.description);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -64,6 +64,16 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void sendAnswerSdp(SessionDescription sdp) {
+        Log.e("sendAnswerSdp", sdp.description);
+        JSONObject jsonObject=new JSONObject();
+        try {
+            jsonObject.put("from",username);
+            jsonObject.put("to",toUsername);
+            jsonObject.put("sdp",sdp.description);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        channelClient.sendMessage("answer",jsonObject,errorMessageAck);
 
     }
 
@@ -129,16 +139,21 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void onIncomingCall(String from, String sdp) {
+        Log.e("onIncomingCall",sdp);
 
     }
 
     @Override
     public void onRingingResponse(String from) {
+        Log.e("onRingingResponse","Ringing "+from);
 
     }
 
     @Override
     public void onRemoteAnswer(String from, String sdp) {
+        Log.e("onRemoteAnswer",sdp);
+        SessionDescription sessionDescription=new SessionDescription(SessionDescription.Type.ANSWER,sdp);
+        events.onRemoteDescription(sessionDescription);
 
     }
 

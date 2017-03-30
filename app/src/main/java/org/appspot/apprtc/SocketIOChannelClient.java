@@ -18,7 +18,7 @@ import io.socket.emitter.Emitter;
  */
 
 public class SocketIOChannelClient {
-    public static String CHAT_SERVER_URL="http://35.164.196.224";
+    public static String CHAT_SERVER_URL="http://192.168.1.125:3000";
     private Socket mSocket;
     ExecutorService executor;
     ThreadUtils.ThreadChecker executorThreadCheck;
@@ -132,7 +132,15 @@ public class SocketIOChannelClient {
 
         @Override
         public void call(Object... args) {
-           eventListener.onRemoteAnswer("","");
+            JSONObject jsonObject=(JSONObject)args[0];
+            try {
+                String from=jsonObject.getString("from");
+                String sdp=jsonObject.getString("sdp");
+                eventListener.onRemoteAnswer(from,sdp);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     };
 

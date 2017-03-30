@@ -203,7 +203,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
       startActivity(intent);
       return true;
     } else if (item.getItemId() == R.id.action_loopback) {
-      connectToRoom(null, false, true, false, 0);
+     // connectToRoom(null, false, true, false, 0);
       return true;
     } else {
       return super.onOptionsItemSelected(item);
@@ -287,7 +287,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   }
 
   private void connectToRoom(String roomId, boolean commandLineRun, boolean loopback,
-      boolean useValuesFromIntent, int runTimeMs) {
+      boolean useValuesFromIntent, int runTimeMs,boolean isInitiated,String offerSDP) {
     this.commandLineRun = commandLineRun;
 
     // roomId is random for loopback.
@@ -469,6 +469,8 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
       Uri uri = Uri.parse(roomUrl);
       Intent intent = new Intent(this, CallActivity.class);
       intent.setData(uri);
+      intent.putExtra(CallActivity.EXTRA_OFFER_SDP,offerSDP);
+      intent.putExtra(CallActivity.EXTRA_IS_INITIATED,isInitiated);
       intent.putExtra(CallActivity.EXTRA_USERNAME,username);
       intent.putExtra(CallActivity.EXTRA_TO_USERNAME,roomId);
       intent.putExtra(CallActivity.EXTRA_ROOMID, roomId);
@@ -575,7 +577,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   private final OnClickListener connectListener = new OnClickListener() {
     @Override
     public void onClick(View view) {
-      connectToRoom(roomEditText.getText().toString(), false, false, false, 0);
+      connectToRoom(roomEditText.getText().toString(), false, false, false, 0,true,null);
     }
   };
 
@@ -624,7 +626,13 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   }
 
   @Override
-  public void onIncomingCall(String from, String sdp) {
+  public void onIncomingCall(final String from, final String sdp) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        showIncomingCallAlert(from,sdp);
+      }
+    });
 
 
   }
@@ -693,7 +701,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
 
   }
 
-  public void showIncomingCallAlert(String from,String sdp){
+  public void showIncomingCallAlert(final String from,final String sdp){
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
     builder.setTitle("Incoming Call");
@@ -702,6 +710,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
       @Override
       public void onClick(DialogInterface dialog, int which) {
 
+        connectToRoom(from, false, false, false, 0,false,sdp);
       }
     });
     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
