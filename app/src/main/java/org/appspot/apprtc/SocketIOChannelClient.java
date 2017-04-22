@@ -5,6 +5,7 @@ import android.app.Activity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.IceCandidate;
 import org.webrtc.ThreadUtils;
 
 import java.util.concurrent.ExecutorService;
@@ -32,16 +33,17 @@ public class SocketIOChannelClient {
         void onIncomingCall(String from,String sdp);
         void onRingingResponse(String from);
         void onRemoteAnswer(String from,String sdp);
+        void onRemoteIceCandidate(String from,IceCandidate iceCandidate);
+        void onRemoteIceRemovals(String from,String candidate);
         void onAck(String from);
     }
 
-    SocketIOChannelClient(Activity activity, SocketIOChannelEvents eventListener){
+    SocketIOChannelClient(SocketIOApplication socketIOApplication, SocketIOChannelEvents eventListener){
         this.executor=executor;
       /*  executorThreadCheck=new ThreadUtils.ThreadChecker();
         executorThreadCheck.detachThread();*/
         this.eventListener=eventListener;
-        SocketIOApplication app=(SocketIOApplication)activity.getApplication();
-        mSocket=app.getSocket();
+        mSocket=socketIOApplication.getSocket();
         if(!mSocket.connected()) {
             mSocket.on(Socket.EVENT_CONNECT, onConnect);
             mSocket.on(Socket.EVENT_DISCONNECT, onDisconnect);
@@ -52,6 +54,8 @@ public class SocketIOChannelClient {
             mSocket.on("ringing", onRingingResponse);
             mSocket.on("answer", onRemoteAnswer);
             mSocket.on("ack", onAcknowledgement);
+            mSocket.on("ice",onRemoteIce);
+            mSocket.on("iceremove",onRemoteIceRemoval);
             mSocket.connect();
         }
     }
@@ -144,6 +148,29 @@ public class SocketIOChannelClient {
         }
     };
 
+    private Emitter.Listener onRemoteIce=new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject jsonObject=(JSONObject)args[0];
+            try{
+                String from=jsonObject.getString("from");
+                String sdpMid=jsonObject.getString("sdpMid");
+                String sdpMLineIndex=jsonObject.getString("sdpMLineIndex");
+                String sdp=jsonObject.getString("sdp");
+                IceCandidate iceCandidate=new IceCandidate(sdpMid,Integer.parseInt(sdpMLineIndex),sdp);
+                eventListener.onRemoteIceCandidate(from,iceCandidate);
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener onRemoteIceRemoval=new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+        }
+    };
 
     private Emitter.Listener onAcknowledgement=new Emitter.Listener(){
 

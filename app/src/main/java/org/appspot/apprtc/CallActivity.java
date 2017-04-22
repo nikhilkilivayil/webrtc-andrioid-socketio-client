@@ -141,7 +141,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private static final int REMOTE_WIDTH = 100;
   private static final int REMOTE_HEIGHT = 100;
   private PeerConnectionClient peerConnectionClient = null;
-  private AppRTCClient appRtcClient;
+  private SocketIORTCClient appRtcClient;
   private SignalingParameters signalingParameters;
   private AppRTCAudioManager audioManager = null;
   private EglBase rootEglBase;
@@ -328,7 +328,14 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     }*/
     String username=intent.getStringExtra(EXTRA_USERNAME);
     String toUsername=intent.getStringExtra(EXTRA_TO_USERNAME);
-    appRtcClient=new SocketIORTCClient(this,this,username,toUsername);
+
+    //appRtcClient=new SocketIORTCClient(this,this,username,toUsername);
+    appRtcClient=((SocketIOApplication)getApplication()).getSocketIORTCClient();
+    appRtcClient.setSignalingEvents(this);
+    appRtcClient.setUsername(username);
+    appRtcClient.setToUsername(toUsername);
+
+
     // Create connection parameters.
    // roomConnectionParameters = new RoomConnectionParameters(roomUri.toString(), roomId, loopback);
 

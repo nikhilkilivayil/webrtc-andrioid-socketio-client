@@ -46,7 +46,7 @@ import io.socket.client.Ack;
 /**
  * Handles the initial setup where the user selects which room to join.
  */
-public class ConnectActivity extends Activity implements SocketIOChannelClient.SocketIOChannelEvents{
+public class ConnectActivity extends Activity implements SocketIORTCClient.SocketIOConnectionListener{
   private static final String TAG = "ConnectActivity";
   private static final int CONNECTION_REQUEST = 1;
   private static final int REMOVE_FAVORITE_INDEX = 0;
@@ -93,9 +93,7 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
   private String keyprefDataProtocol;
   private String keyprefNegotiated;
   private String keyprefDataId;
-  SocketIOChannelClient channelClient;
-
-
+  SocketIORTCClient socketIORTCClient;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -153,10 +151,8 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
     connectButton = (ImageButton) findViewById(R.id.connect_button);
     connectButton.setOnClickListener(connectListener);
 
-
-
-
-    channelClient=new SocketIOChannelClient(this,this);
+    socketIORTCClient=((SocketIOApplication)getApplication()).getSocketIORTCClient();
+    socketIORTCClient.setSocketIOConnectionListener(this);
     Toast.makeText(this,"Connecting..",Toast.LENGTH_SHORT).show();
     showInputDialog();
 
@@ -637,20 +633,6 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
 
   }
 
-  @Override
-  public void onRingingResponse(String from) {
-
-  }
-
-  @Override
-  public void onRemoteAnswer(String from, String sdp) {
-
-  }
-
-  @Override
-  public void onAck(String from) {
-
-  }
   private void showInputDialog(){
 
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -684,8 +666,9 @@ public class ConnectActivity extends Activity implements SocketIOChannelClient.S
           }
         };
         username = input.getText().toString();
-        if(channelClient.isConnected()){
-          channelClient.loginAttempt(username,ack);
+
+        if(socketIORTCClient.isConnected()){
+          socketIORTCClient.checkLogin(username,ack);
         }
       }
     });

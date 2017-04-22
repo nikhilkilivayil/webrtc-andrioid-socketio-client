@@ -11,8 +11,12 @@ import java.net.URISyntaxException;
  */
 
 public class SocketIOApplication extends Application {
-    private Socket mSocket;
-    {
+    private static Socket mSocket;
+    private static SocketIORTCClient socketIORTCClient;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
         try {
             IO.Options options=new IO.Options();
 //            options.hostname="http://35.164.196.224";
@@ -21,6 +25,7 @@ public class SocketIOApplication extends Application {
             options.reconnection=false;
 
             mSocket = IO.socket(SocketIOChannelClient.CHAT_SERVER_URL,options);
+            socketIORTCClient=new SocketIORTCClient(this);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -28,5 +33,8 @@ public class SocketIOApplication extends Application {
 
     public Socket getSocket() {
         return mSocket;
+    }
+    public SocketIORTCClient getSocketIORTCClient(){
+        return socketIORTCClient;
     }
 }

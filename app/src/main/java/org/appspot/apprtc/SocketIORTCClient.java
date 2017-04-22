@@ -19,7 +19,7 @@ import io.socket.client.Ack;
 
 public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.SocketIOChannelEvents {
     private static final String TAG = "WSRTCClient";
-    private SignalingEvents events;
+
     private enum ConnectionState { NEW, CONNECTED, CLOSED, ERROR }
     private ConnectionState roomState;
     SocketIOChannelClient channelClient;
@@ -27,14 +27,52 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
     private String toUsername;
     Activity activity;
 
-    SocketIORTCClient(Activity activity,SignalingEvents events,String username,String toUsername){
-        this.events=events;
-        this.activity=activity;
-        roomState=ConnectionState.NEW;
-        channelClient=new SocketIOChannelClient(activity,this);
-        this.username=username;
-        this.toUsername=toUsername;
+    SocketIOConnectionListener socketIOConnectionListener;
+    SocketIOIncomingListener socketIOIncomingListener;
+    SocketIOOutgoingLIstener socketIOOutgoingLIstener;
+    SignalingEvents signalingEvents;
 
+    public interface SocketIOConnectionListener{
+        void onConnect();
+        void onDisconnect();
+        void onConnectError();
+        void onLineUserNames(JSONArray usernames);
+        void onIncomingCall(String from,String sdp);
+    }
+
+    public interface SocketIOIncomingListener{
+        void onAck(String from);
+    }
+
+    public interface SocketIOOutgoingLIstener{
+        void onRingingResponse(String from);
+        void onRemoteAnswer(String from,String sdp);
+    }
+
+    SocketIORTCClient(SocketIOApplication socketIOApplication){
+        roomState=ConnectionState.NEW;
+        channelClient=new SocketIOChannelClient(socketIOApplication,this);
+       /* this.username=username;
+        this.toUsername=toUsername;*/
+
+    }
+
+    public void setSocketIOConnectionListener(SocketIOConnectionListener socketIOConnectionListener) {
+        this.socketIOConnectionListener = socketIOConnectionListener;
+    }
+
+
+    public void setSocketIOIncomingListener(SocketIOIncomingListener socketIOIncomingListener) {
+        this.socketIOIncomingListener = socketIOIncomingListener;
+    }
+
+    public void setSocketIOOutgoingLIstener(SocketIOOutgoingLIstener socketIOOutgoingLIstener) {
+        this.socketIOOutgoingLIstener = socketIOOutgoingLIstener;
+    }
+
+
+    public void setSignalingEvents(SignalingEvents signalingEvents) {
+        this.signalingEvents = signalingEvents;
     }
 
     Ack errorMessageAck=new Ack() {
@@ -119,27 +157,28 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void onConnect() {
-
+        socketIOConnectionListener.onConnect();
     }
 
     @Override
     public void onDisconnect() {
-
+        socketIOConnectionListener.onDisconnect();
     }
 
     @Override
     public void onConnectError() {
-
+        socketIOConnectionListener.onConnectError();
     }
 
     @Override
     public void onLineUserNames(JSONArray usernames) {
-
+        socketIOConnectionListener.onLineUserNames(usernames);
     }
 
     @Override
     public void onIncomingCall(String from, String sdp) {
         Log.e("onIncomingCall",sdp);
+        socketIOConnectionListener.onIncomingCall(from,sdp);
 
     }
 
@@ -153,12 +192,42 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
     public void onRemoteAnswer(String from, String sdp) {
         Log.e("onRemoteAnswer",sdp);
         SessionDescription sessionDescription=new SessionDescription(SessionDescription.Type.ANSWER,sdp);
-        events.onRemoteDescription(sessionDescription);
+        signalingEvents.onRemoteDescription(sessionDescription);
+
+    }
+
+    @Override
+    public void onRemoteIceCandidate(String from, IceCandidate iceCandidate) {
+        if(signalingEvents!=null)
+            signalingEvents.onRemoteIceCandidate(iceCandidate);
+        else{
+            PeerConnectionClient.getInstance().addRemoteIceCandidate(iceCandidate);
+        }
+
+    }
+
+    @Override
+    public void onRemoteIceRemovals(String from, String candidate) {
 
     }
 
     @Override
     public void onAck(String from) {
 
+    }
+
+
+    public void checkLogin(String username, Ack ack){
+        channelClient.loginAttempt(username,ack);
+    }
+
+    public boolean isConnected(){
+        return channelClient.isConnected();
+    }
+    public void setUsername(String username){
+        this.username=username;
+    }
+    public void setToUsername(String toUsername){
+        this.toUsername=toUsername;
     }
 }
