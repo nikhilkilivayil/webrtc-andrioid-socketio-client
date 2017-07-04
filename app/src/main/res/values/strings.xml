@@ -4,11 +4,10 @@
     <string name="settings_name" translatable="false">AppRTC Settings</string>
     <string name="disconnect_call">Disconnect Call</string>
     <string name="room_description">
-        Please enter a room name. Room names are shared with everyone, so think
-        of something unique and send it to a friend.
+        Please select a username from the online users list and press call button.
     </string>
-    <string name="favorites">Favorites</string>
-    <string name="no_favorites">No favorites</string>
+    <string name="favorites">Online Users</string>
+    <string name="no_favorites">No Online users</string>
     <string name="invalid_url_title">Invalid URL</string>
     <string name="invalid_url_text">The URL or room name you entered resulted in an invalid URL: %1$s
     </string>

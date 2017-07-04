@@ -157,7 +157,16 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
     @Override
     public void onConnect() {
-        socketIOConnectionListener.onConnect();
+        if(socketIOConnectionListener!=null)
+            socketIOConnectionListener.onConnect();
+        else{
+            try {
+                Thread.sleep(1000);
+                socketIOConnectionListener.onConnect();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

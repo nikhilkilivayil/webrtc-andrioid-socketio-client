@@ -12,7 +12,7 @@
         android:id="@+id/room_edittext_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/room_description"/>
+        android:text="@string/room_description" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -21,14 +21,13 @@
         android:gravity="center"
         android:layout_marginBottom="8dp">
 
-        <EditText
+        <TextView
             android:id="@+id/room_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-            android:inputType="text"/>
+            android:textSize="25sp"
+            />
 
         <ImageButton
             android:id="@+id/connect_button"

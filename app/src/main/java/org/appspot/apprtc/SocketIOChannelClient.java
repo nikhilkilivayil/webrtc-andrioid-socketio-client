@@ -19,7 +19,7 @@ import io.socket.emitter.Emitter;
  */
 
 public class SocketIOChannelClient {
-    public static String CHAT_SERVER_URL="http://192.168.1.125:3000";
+    public static String CHAT_SERVER_URL="http://139.59.55.22";
     private Socket mSocket;
     ExecutorService executor;
     ThreadUtils.ThreadChecker executorThreadCheck;

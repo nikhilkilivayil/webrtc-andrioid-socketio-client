@@ -54,7 +54,7 @@ public class ConnectActivity extends Activity implements SocketIORTCClient.Socke
   private String username;
 
   private ImageButton connectButton;
-  private EditText roomEditText;
+  private TextView roomEditText;
   private ListView roomListView;
   private SharedPreferences sharedPref;
   private String keyprefVideoCallEnabled;
@@ -139,7 +139,7 @@ public class ConnectActivity extends Activity implements SocketIORTCClient.Socke
 
     setContentView(R.layout.activity_connect);
 
-    roomEditText = (EditText) findViewById(R.id.room_edittext);
+    roomEditText = (TextView) findViewById(R.id.room_edittext);
     //roomEditText.setEnabled(false);
 
     roomEditText.requestFocus();
@@ -198,10 +198,10 @@ public class ConnectActivity extends Activity implements SocketIORTCClient.Socke
       Intent intent = new Intent(this, SettingsActivity.class);
       startActivity(intent);
       return true;
-    } else if (item.getItemId() == R.id.action_loopback) {
+    } /*else if (item.getItemId() == R.id.action_loopback) {
      // connectToRoom(null, false, true, false, 0);
       return true;
-    } else {
+    }*/ else {
       return super.onOptionsItemSelected(item);
     }
   }
