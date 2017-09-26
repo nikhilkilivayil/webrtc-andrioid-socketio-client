@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
 import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
-import org.appspot.apprtc.AppRTCClient.RoomConnectionParameters;
 import org.appspot.apprtc.AppRTCClient.SignalingParameters;
 import org.appspot.apprtc.PeerConnectionClient.DataChannelParameters;
 import org.appspot.apprtc.PeerConnectionClient.PeerConnectionParameters;
@@ -157,7 +156,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private boolean commandLineRun;
   private int runTimeMs;
   private boolean activityRunning;
-  private RoomConnectionParameters roomConnectionParameters;
   private PeerConnectionParameters peerConnectionParameters;
   private boolean iceConnected;
   private boolean isError;
@@ -336,8 +334,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     appRtcClient.setToUsername(toUsername);
 
 
-    // Create connection parameters.
-   // roomConnectionParameters = new RoomConnectionParameters(roomUri.toString(), roomId, loopback);
 
     // Create CPU monitor
     cpuMonitor = new CpuMonitor(this);
@@ -547,9 +543,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     }
     callStartedTimeMs = System.currentTimeMillis();
 
-    // Start room connection.
-    //logAndToast(getString(R.string.connecting_to, roomConnectionParameters.roomUrl));
-    //appRtcClient.connectToRoom(roomConnectionParameters);
 
     // Create and audio manager that will take care of audio routing,
     // audio modes, audio device enumeration etc.
@@ -568,7 +561,9 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     });
 
     LinkedList<PeerConnection.IceServer> iceServers =new LinkedList<PeerConnection.IceServer>();
-    iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302", "", ""));
+   // iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302", "", ""));
+    iceServers.add(new PeerConnection.IceServer("turn:numb.viagenie.ca","muazkh","webrtc@live.com"));
+
     SignalingParameters params;
     if(isInitiated){
        params = new SignalingParameters(
@@ -762,15 +757,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     }
   }
 
-  @Override
-  public void onConnectedToRoom(final SignalingParameters params) {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        onConnectedToRoomInternal(params);
-      }
-    });
-  }
 
   @Override
   public void onRemoteDescription(final SessionDescription sdp) {

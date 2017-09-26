@@ -39,9 +39,6 @@ public class SocketIOChannelClient {
     }
 
     SocketIOChannelClient(SocketIOApplication socketIOApplication, SocketIOChannelEvents eventListener){
-        this.executor=executor;
-      /*  executorThreadCheck=new ThreadUtils.ThreadChecker();
-        executorThreadCheck.detachThread();*/
         this.eventListener=eventListener;
         mSocket=socketIOApplication.getSocket();
         if(!mSocket.connected()) {

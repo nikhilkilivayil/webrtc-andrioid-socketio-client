@@ -20,26 +20,6 @@ import java.util.List;
  * AppRTCClient is the interface representing an AppRTC client.
  */
 public interface AppRTCClient {
-  /**
-   * Struct holding the connection parameters of an AppRTC room.
-   */
-  class RoomConnectionParameters {
-    public final String roomUrl;
-    public final String roomId;
-    public final boolean loopback;
-    public RoomConnectionParameters(String roomUrl, String roomId, boolean loopback) {
-      this.roomUrl = roomUrl;
-      this.roomId = roomId;
-      this.loopback = loopback;
-    }
-  }
-
-  /**
-   * Asynchronously connect to an AppRTC room URL using supplied connection
-   * parameters. Once connection is established onConnectedToRoom()
-   * callback with room parameters is invoked.
-   */
-  void connectToRoom(RoomConnectionParameters connectionParameters);
 
   /**
    * Send offer SDP to the other participant.
@@ -97,11 +77,6 @@ public interface AppRTCClient {
    * <p>Methods are guaranteed to be invoked on the UI thread of |activity|.
    */
   interface SignalingEvents {
-    /**
-     * Callback fired once the room's signaling parameters
-     * SignalingParameters are extracted.
-     */
-    void onConnectedToRoom(final SignalingParameters params);
 
     /**
      * Callback fired once remote SDP is received.

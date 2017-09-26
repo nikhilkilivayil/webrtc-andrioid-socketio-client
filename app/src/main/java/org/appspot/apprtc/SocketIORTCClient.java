@@ -81,10 +81,6 @@ public class SocketIORTCClient implements AppRTCClient,SocketIOChannelClient.Soc
 
         }
     };
-    @Override
-    public void connectToRoom(RoomConnectionParameters connectionParameters) {
-
-    }
 
     @Override
     public void sendOfferSdp(SessionDescription sdp) {
